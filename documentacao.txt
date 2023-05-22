@@ -1,0 +1,82 @@
+-- Sobre o arquivo upload.php --
+
+require_once 'config.php';
+>>>>A linha require_once 'config.php'; faz a inclusão do arquivo config.php no arquivo upload.php. Isso permite que o código em upload.php utilize as configurações de conexão com o banco de dados presentes em config.php.
+
+$diretorio = 'fotos/';
+>>>>A próxima linha define a variável $diretorio com o valor 'fotos/'. Essa variável representa o diretório onde as fotos serão armazenadas.
+
+
+if (!file_exists($diretorio)) {
+    mkdir($diretorio, 0777, true);
+}
+>>>>O código verifica se o diretório $diretorio não existe usando a função file_exists(). Se o diretório não existir, a função mkdir() é chamada para criar o diretório com as permissões 0777 (leitura, gravação e execução para todos os usuários).
+
+
+if ($_FILES['foto']['error'] === UPLOAD_ERR_OK) {
+    $nomeArquivo = $_FILES['foto']['name'];
+    $caminhoArquivo = $diretorio . $nomeArquivo;
+>>>>Neste trecho, o código verifica se o upload do arquivo foi realizado sem erros. Ele acessa o valor do campo $_FILES['foto']['error'] e compara com a constante UPLOAD_ERR_OK, que indica que não houve erros no upload. Se não houver erros, as variáveis $nomeArquivo e $caminhoArquivo são definidas com o nome original do arquivo e o caminho completo para onde o arquivo será movido.
+
+
+
+if (move_uploaded_file($_FILES['foto']['tmp_name'], $caminhoArquivo)) {
+>>>>Aqui, o código usa a função move_uploaded_file() para mover o arquivo temporário para o diretório de destino. A função recebe o caminho temporário do arquivo (obtido através de $_FILES['foto']['tmp_name']) e o caminho completo de destino ($caminhoArquivo). Se a função retornar verdadeiro, indica que o arquivo foi movido com sucesso e o código continua a execução dentro deste bloco.
+
+
+
+$sql = "INSERT INTO fotos (nome, caminho, data_upload) VALUES (?, ?, NOW())";
+$stmt = $conexao->prepare($sql);
+>>>>Aqui, o código define a instrução SQL para inserir os dados da foto na tabela fotos do banco de dados. A instrução SQL contém espaços reservados (?) para os valores que serão inseridos posteriormente. Em seguida, a instrução SQL é preparada para execução chamando o método prepare() no objeto $conexao, que representa a conexão com o banco de dados.
+
+
+
+ if (!$stmt) {
+    echo 'Erro na preparação da declaração SQL: ' . $conexao->error;
+} else {
+>>>>Essa verificação condicional if (!$stmt) verifica se ocorreu algum erro durante a preparação da instrução SQL. Se ocorrer um erro, a mensagem de erro é exibida na tela.
+
+
+$stmt->bind_param('ss', $nomeArquivo, $caminhoArquivo);
+>>>>Nesta linha, o código utiliza o método bind_param() do objeto $stmt para vincular os valores das variáveis $nomeArquivo e $caminhoArquivo aos espaços reservados na instrução SQL. A string 'ss' passada como primeiro argumento indica os tipos de dados dos parâmetros (ambos são strings).
+
+
+if ($stmt->execute()) {
+    echo 'Foto enviada e dados salvos no banco de dados com sucesso!';
+} else {
+    echo 'Ocorreu um erro ao salvar os dados no banco de dados.';
+}
+>>>>O código executa a instrução SQL chamando o método execute() do objeto $stmt. Se a execução for bem-sucedida, ou seja, os dados forem inseridos no banco de dados, é exibida a mensagem "Foto enviada e dados salvos no banco de dados com sucesso!". Caso contrário, é exibida a mensagem de erro "Ocorreu um erro ao salvar os dados no banco de dados."
+
+
+$stmt->close();
+>>>>Após a execução da instrução SQL, é importante fechar a declaração preparada usando o método close() do objeto $stmt. Isso libera os recursos associados à declaração SQL.
+
+
+} else {
+    echo 'Ocorreu um erro ao enviar a foto.';
+}
+>>>>Se ocorrer algum erro ao mover o arquivo para o diretório de destino, é exibida a mensagem "Ocorreu um erro ao enviar a foto."
+
+
+$conexao->close();
+>>>>Finalmente, após todas as operações, é importante fechar a conexão com o banco de dados usando o método close() do objeto $conexao. Isso libera os recursos de conexão.
+
+
+-- Sobre o arquivo buscar_foto.php --
+
+if (isset($_POST['buscar'])) {
+    // Obtém o valor digitado pelo usuário
+    $nomeFoto = $_POST['nome_foto'];
+>>>Essa estrutura condicional verifica se o formulário de busca foi enviado pelo usuário. O isset($_POST['buscar']) verifica se o valor 'buscar' está presente no array $_POST, indicando que o formulário foi enviado. Se for verdadeiro, o código dentro do bloco if é executado.
+
+Dentro do bloco if, o código obtém o valor digitado pelo usuário no campo de busca. $_POST['nome_foto'] refere-se ao campo de formulário com o atributo name="nome_foto". O valor digitado é armazenado na variável $nomeFoto para uso posterior.
+
+
+$sql = "SELECT * FROM fotos WHERE nome LIKE '%$nomeFoto%'";
+$resultado = $conexao->query($sql);
+>>>Nessas linhas, é criada uma consulta SQL para buscar as fotos no banco de dados com base no nome fornecido pelo usuário. A consulta usa a cláusula LIKE para comparar o valor do campo nome com a variável $nomeFoto. O uso de % antes e depois de $nomeFoto permite buscar registros que contenham o valor digitado em qualquer posição do nome.
+
+A consulta é executada por meio do método query() do objeto de conexão $conexao. O resultado da consulta é armazenado na variável $resultado para uso posterior.
+
+No geral, esse trecho de código lida com o processo de busca de fotos no banco de dados com base no nome fornecido pelo usuário. A consulta é construída dinamicamente e o resultado é armazenado para uso posterior na exibição dos resultados da busca.
